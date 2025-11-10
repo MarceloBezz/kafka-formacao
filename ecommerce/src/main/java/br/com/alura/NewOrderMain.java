@@ -3,6 +3,7 @@ package br.com.alura;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -12,15 +13,25 @@ public class NewOrderMain {
     @SuppressWarnings("resource")
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         var producer = new KafkaProducer<String, String>(properties());
+        
         var value = "132123,23566,9458305";
         var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", value, value);
-        producer.send(record, (data, ex) -> {
+        
+        var email = "Thank you for your order! We are processing your order!";
+        var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", email, email);
+        
+        producer.send(record, callback()).get();
+        producer.send(emailRecord, callback()).get();
+    }
+
+    private static Callback callback() {
+        return (data, ex) -> {
             if (ex != null) {
                 ex.printStackTrace();
                 return;
             }
             System.out.println("Sucesso enviando " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/ timestamp " + data.timestamp());
-        }).get();
+        };
     }
 
     private static Properties properties() {
