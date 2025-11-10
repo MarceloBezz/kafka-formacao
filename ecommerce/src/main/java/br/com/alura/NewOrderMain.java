@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 public class NewOrderMain {
+    @SuppressWarnings("resource")
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         var producer = new KafkaProducer<String, String>(properties());
         var value = "132123,23566,9458305";
