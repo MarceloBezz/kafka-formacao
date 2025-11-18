@@ -21,11 +21,7 @@ public class EmailService {
         System.out.println(record.value());
         System.out.println(record.partition());
         System.out.println(record.offset());
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         System.out.println("Email sent!");
     }
 }
