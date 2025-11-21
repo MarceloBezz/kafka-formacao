@@ -37,7 +37,7 @@ public class BatchSendMessageService {
     void parse(ConsumerRecord<String, String> record) throws InterruptedException, ExecutionException, SQLException {
         System.out.println("------------------------------------------");
         System.out.println("Processing new batch");
-        System.out.println("Topic" + record.value());
+        System.out.println("Topic " + record.value());
 
         for (User user : getAllUsers()) {
             userDispatcher.send(record.value(), user.getUuid(), user);
