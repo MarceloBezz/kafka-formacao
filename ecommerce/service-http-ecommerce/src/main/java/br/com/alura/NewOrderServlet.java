@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 public class NewOrderServlet extends HttpServlet {
 
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<Order>();
-    private final KafkaDispatcher<Email> emailDispatcher = new KafkaDispatcher<Email>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,9 +25,6 @@ public class NewOrderServlet extends HttpServlet {
 
                 var order = new Order(orderId, amount, email);
                 orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order, new CorrelationId(NewOrderServlet.class.getSimpleName()));
-
-                var emailCode = new Email("New order", "Thank you for your order! We are processing your order!");
-                emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailCode, new CorrelationId(NewOrderServlet.class.getSimpleName()));
 
                 System.out.println("New order sent successfully");
                 resp.setStatus(200);
