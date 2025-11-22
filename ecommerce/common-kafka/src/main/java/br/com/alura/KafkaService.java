@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -25,12 +26,14 @@ class KafkaService<T> {
         this.consumer.subscribe(Collections.singletonList(topic));
     }
 
-    KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse,Map<String, String> properties) {
+    KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String, String> properties) {
         this(groupId, parse, properties);
         this.consumer.subscribe(topic);
     }
 
-    void run() {
+    @SuppressWarnings({ "rawtypes", "resource", "unchecked" })
+    void run() throws InterruptedException, ExecutionException {
+        var deadLetter = new KafkaDispatcher<>();
         while (true) {
             var records = consumer.poll(Duration.ofMillis(100));
             if (!records.isEmpty()) {
@@ -39,10 +42,12 @@ class KafkaService<T> {
                     try {
                         parse.consume(record);
                     } catch (Exception e) {
-                        // Only catches Exception because no matter which Exception
-                        // I want to recover and parse the next one
-                        // FIXME so far, just logging the exception for this message
                         e.printStackTrace();
+                        var message = record.value();
+                        deadLetter.send("ECOMMERCE_DEADLETTER",
+                                message.getId().toString(),
+                                new GsonSerializer().serialize("", message),
+                                message.getId().continueWith("Deadletter"));
                     }
                 }
             }
@@ -56,6 +61,7 @@ class KafkaService<T> {
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
         properties.putAll(overrideProperties);
         return properties;
     }

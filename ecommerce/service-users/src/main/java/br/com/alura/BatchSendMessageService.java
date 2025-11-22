@@ -22,7 +22,7 @@ public class BatchSendMessageService {
                 email varchar(200))""");
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, InterruptedException, ExecutionException {
         var batchService = new BatchSendMessageService();
         var service = new KafkaService<String>(BatchSendMessageService.class.getSimpleName(),
                 "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS",
@@ -40,7 +40,7 @@ public class BatchSendMessageService {
         System.out.println("Topic " + message.getPayload());
 
         for (User user : getAllUsers()) {
-            userDispatcher.send(message.getPayload(), user.getUuid(), user, message.getId().continueWith(BatchSendMessageService.class.getSimpleName()));
+            userDispatcher.sendAsync(message.getPayload(), user.getUuid(), user, message.getId().continueWith(BatchSendMessageService.class.getSimpleName()));
         }
     }
 

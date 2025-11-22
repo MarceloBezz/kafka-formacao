@@ -2,11 +2,13 @@ package br.com.alura;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 class KafkaDispatcher<T> {
@@ -16,7 +18,7 @@ class KafkaDispatcher<T> {
         this.producer = new KafkaProducer<>(properties());
     }
 
-    void send(String topic, String key, T payload, CorrelationId id) throws InterruptedException, ExecutionException {
+    Future<RecordMetadata> sendAsync(String topic, String key, T payload, CorrelationId id)throws InterruptedException, ExecutionException {
         var value = new Message<>(id, payload);
         var record = new ProducerRecord<>(topic, key, value);
 
@@ -29,7 +31,12 @@ class KafkaDispatcher<T> {
                     + data.offset() + "/ timestamp " + data.timestamp());
         };
 
-        producer.send(record, callback).get();
+        return producer.send(record, callback);
+    }
+
+    void send(String topic, String key, T payload, CorrelationId id) throws InterruptedException, ExecutionException {
+        Future<RecordMetadata> future = sendAsync(topic, key, payload, id);
+        future.get();
     }
 
     static Properties properties() {
@@ -37,7 +44,7 @@ class KafkaDispatcher<T> {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
-        properties.setProperty(ProducerConfig.ACKS_CONFIG,"all");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         return properties;
     }
 }

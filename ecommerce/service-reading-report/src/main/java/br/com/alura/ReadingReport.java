@@ -6,13 +6,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class ReadingReport {
 
     // private static final Path SOURCE = Paths.get(ReadingReport.class.getClassLoader().getResource("report.txt").toURI());
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         var readingReportService = new ReadingReport();
         var service = new KafkaService<User>(ReadingReport.class.getSimpleName(),
                 "ECOMMERCE_USER_GENERATE_READING_REPORT",

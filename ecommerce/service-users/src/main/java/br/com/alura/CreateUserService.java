@@ -21,7 +21,7 @@ public class CreateUserService {
                 email varchar(200))""");
     }
     
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, InterruptedException, ExecutionException {
         var createUserService = new CreateUserService();
         var service = new KafkaService<Order>(CreateUserService.class.getSimpleName(), "ECOMMERCE_NEW_ORDER",
                 createUserService::parse,
