@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import br.com.alura.dispatcher.KafkaDispatcher;
+
 public class NewOrderMain {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         var orderDispatcher = new KafkaDispatcher<Order>();

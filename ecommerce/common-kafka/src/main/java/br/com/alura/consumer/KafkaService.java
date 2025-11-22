@@ -1,4 +1,4 @@
-package br.com.alura;
+package br.com.alura.consumer;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -12,7 +12,11 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-class KafkaService<T> {
+import br.com.alura.Message;
+import br.com.alura.dispatcher.GsonSerializer;
+import br.com.alura.dispatcher.KafkaDispatcher;
+
+public class KafkaService<T> {
     private final KafkaConsumer<String, Message<T>> consumer;
     private final ConsumerFunction<T> parse;
 
@@ -21,18 +25,18 @@ class KafkaService<T> {
         this.consumer = new KafkaConsumer<>(getProperties(groupId, properties));
     }
 
-    KafkaService(String groupId, String topic, ConsumerFunction<T> parse, Map<String, String> properties) {
+    public KafkaService(String groupId, String topic, ConsumerFunction<T> parse, Map<String, String> properties) {
         this(groupId, parse, properties);
         this.consumer.subscribe(Collections.singletonList(topic));
     }
 
-    KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String, String> properties) {
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String, String> properties) {
         this(groupId, parse, properties);
         this.consumer.subscribe(topic);
     }
 
     @SuppressWarnings({ "rawtypes", "resource", "unchecked" })
-    void run() throws InterruptedException, ExecutionException {
+    public void run() throws InterruptedException, ExecutionException {
         var deadLetter = new KafkaDispatcher<>();
         while (true) {
             var records = consumer.poll(Duration.ofMillis(100));

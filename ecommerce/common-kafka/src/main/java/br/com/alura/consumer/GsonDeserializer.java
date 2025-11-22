@@ -1,9 +1,12 @@
-package br.com.alura;
+package br.com.alura.consumer;
 
 import org.apache.kafka.common.serialization.Deserializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import br.com.alura.Message;
+import br.com.alura.MessageAdapter;
 
 @SuppressWarnings("rawtypes")
 public class GsonDeserializer implements Deserializer<Message> {

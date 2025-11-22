@@ -1,4 +1,4 @@
-package br.com.alura;
+package br.com.alura.dispatcher;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -11,15 +11,18 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-class KafkaDispatcher<T> {
+import br.com.alura.CorrelationId;
+import br.com.alura.Message;
+
+public class KafkaDispatcher<T> {
     private final KafkaProducer<String, Message<T>> producer;
 
-    KafkaDispatcher() {
+    public KafkaDispatcher() {
         this.producer = new KafkaProducer<>(properties());
     }
 
-    Future<RecordMetadata> sendAsync(String topic, String key, T payload, CorrelationId id)throws InterruptedException, ExecutionException {
-        var value = new Message<>(id, payload);
+    public Future<RecordMetadata> sendAsync(String topic, String key, T payload, CorrelationId id)throws InterruptedException, ExecutionException {
+        var value = new Message<>(id.continueWith("_" + topic), payload);
         var record = new ProducerRecord<>(topic, key, value);
 
         Callback callback = (data, ex) -> {
@@ -34,12 +37,12 @@ class KafkaDispatcher<T> {
         return producer.send(record, callback);
     }
 
-    void send(String topic, String key, T payload, CorrelationId id) throws InterruptedException, ExecutionException {
+    public void send(String topic, String key, T payload, CorrelationId id) throws InterruptedException, ExecutionException {
         Future<RecordMetadata> future = sendAsync(topic, key, payload, id);
         future.get();
     }
 
-    static Properties properties() {
+    private static Properties properties() {
         var properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());

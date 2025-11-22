@@ -6,6 +6,9 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import br.com.alura.consumer.KafkaService;
+import br.com.alura.dispatcher.KafkaDispatcher;
+
 public class FraudDetectorService {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         var fraudService = new FraudDetectorService();

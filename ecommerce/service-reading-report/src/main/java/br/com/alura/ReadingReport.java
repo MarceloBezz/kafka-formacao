@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import br.com.alura.consumer.KafkaService;
+
 public class ReadingReport {
 
     // private static final Path SOURCE = Paths.get(ReadingReport.class.getClassLoader().getResource("report.txt").toURI());

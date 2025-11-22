@@ -8,6 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import br.com.alura.consumer.KafkaService;
+
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LogService {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
