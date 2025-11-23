@@ -5,26 +5,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import br.com.alura.consumer.KafkaService;
+import br.com.alura.consumer.ConsumerService;
+import br.com.alura.consumer.ServiceRunner;
 
-public class ReadingReport {
+public class ReadingReport implements ConsumerService<User>{
 
-    // private static final Path SOURCE = Paths.get(ReadingReport.class.getClassLoader().getResource("report.txt").toURI());
-    public static void main(String[] args) throws InterruptedException, ExecutionException {
-        var readingReportService = new ReadingReport();
-        var service = new KafkaService<User>(ReadingReport.class.getSimpleName(),
-                "ECOMMERCE_USER_GENERATE_READING_REPORT",
-                readingReportService::parse,
-                Map.of());
-        service.run();
+    public static void main(String[] args) {
+        new ServiceRunner<>(ReadingReport::new).start(5);
     }
 
-    void parse(ConsumerRecord<String, Message<User>> record) throws IOException, URISyntaxException {
+    public void parse(ConsumerRecord<String, Message<User>> record) throws URISyntaxException, IOException {
         Path SOURCE = Paths.get(ReadingReport.class.getClassLoader().getResource("report.txt").toURI());
         System.out.println("------------------------------------------");
         System.out.println("Processing report for" + record.value());
@@ -35,5 +27,15 @@ public class ReadingReport {
         IO.append(target, "Created for " + user.getUuid());
 
         System.out.println("File created: " + target.getAbsolutePath());
+    }
+
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_USER_GENERATE_READING_REPORT";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return ReadingReport.class.getSimpleName();
     }
 }

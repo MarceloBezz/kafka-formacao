@@ -1,22 +1,26 @@
 package br.com.alura;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import br.com.alura.consumer.KafkaService;
+import br.com.alura.consumer.ConsumerService;
+import br.com.alura.consumer.ServiceRunner;
 
-public class EmailService {
+public class EmailService implements ConsumerService<String> {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        var emailService = new EmailService();
-        var service = new KafkaService<Email>(EmailService.class.getSimpleName(), "ECOMMERCE_SEND_EMAIL",
-                emailService::parse,
-                Map.of());
-        service.run();
+        new ServiceRunner<>(EmailService::new).start(5);
     }
 
-    private void parse(ConsumerRecord<String, Message<Email>> record) {
+    public String getConsumerGroup() {
+        return EmailService.class.getSimpleName();
+    }
+
+    public String getTopic() {
+        return "ECOMMERCE_SEND_EMAIL";
+    }
+
+    public void parse(ConsumerRecord<String, Message<String>> record) {
         System.out.println("------------------------------------------");
         System.out.println("SEND EMAIL");
         System.out.println(record.key());
